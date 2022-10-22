@@ -7,36 +7,41 @@ namespace DeepLTranslator
         private string _authKey = "";
         private string _document;
         private string _textToTranslate;
-        private string _translatedText; 
+        private string _translatedText;
 
         public MainWindow()
         {
             InitializeComponent();
-        }                                             
+        }
 
         private void btn_Load_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.ShowDialog();
 
-            var fileName = openFileDialog.FileName;
-            _document = File.ReadAllText(fileName);
+            var path = openFileDialog.FileName;
 
-            _textToTranslate = PrepareDocumentForTranslation(_document);
-            txt_BeforeTranslate.Text = _document;
+            if (!string.IsNullOrEmpty(path))
+            {
+                _document = File.ReadAllText(path);
+
+                _textToTranslate = PrepareDocumentForTranslation(_document);
+                txt_BeforeTranslate.Text = _document;
+            }
         }
 
         private async void btn_Translate_Click(object sender, EventArgs e)
         {
-            var charactersToTranslate = _textToTranslate.ToArray().Length;
-
             if (!string.IsNullOrEmpty(_textToTranslate))
+            {
+                var charactersToTranslate = _textToTranslate.ToArray().Length;
                 _translatedText = await Task.Run(() => TranslateText(_textToTranslate));
+
+                var result = RestoreToInputForm(_translatedText, _document);
+                txt_AfterTranslate.Text = result;
+            }
             else
-                txt_AfterTranslate.Text = "Error";       
-            
-            var result = RestoreToInputForm(_translatedText, _document);
-            txt_AfterTranslate.Text = result;
+                txt_AfterTranslate.Text = "Error";
         }
 
         private void btn_Save_Click(object sender, EventArgs e)
@@ -45,8 +50,12 @@ namespace DeepLTranslator
             saveFileDialog.ShowDialog();
 
             string path = saveFileDialog.FileName;
-            var textToSave = txt_AfterTranslate.Text;
-            File.WriteAllText(path, textToSave);
+
+            if (!string.IsNullOrEmpty(path))
+            {
+                var textToSave = txt_AfterTranslate.Text;
+                File.WriteAllText(path, textToSave);
+            }
         }
 
         private string PrepareDocumentForTranslation(string document)
@@ -62,7 +71,7 @@ namespace DeepLTranslator
                     result += splitSingleBlock[2] + Environment.NewLine;
             }
 
-            return result;      
+            return result;
         }
 
         private async Task<string> TranslateText(string text)
