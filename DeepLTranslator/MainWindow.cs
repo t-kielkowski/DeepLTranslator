@@ -1,10 +1,11 @@
 using DeepL;
+using System.Text;
 
 namespace DeepLTranslator
 {
     public partial class MainWindow : Form
     {
-        private string _authKey = "";
+        private string _authKey = "590d8756-d0f3-7b45-868f-fc135ab30508:fx";
         private string _document;
         private string _textToTranslate;
         private string _translatedText;
@@ -23,7 +24,15 @@ namespace DeepLTranslator
 
             if (!string.IsNullOrEmpty(path))
             {
-                _document = File.ReadAllText(path);
+                try
+                {
+                    _document = File.ReadAllText(path);
+                }
+                catch (Exception exc)
+                {
+                    txt_BeforeTranslate.Text = "The file is not a text document. Exception message: " + exc.Message;
+
+                }
 
                 _textToTranslate = PrepareDocumentForTranslation(_document);
                 txt_BeforeTranslate.Text = _document;
@@ -54,8 +63,14 @@ namespace DeepLTranslator
             if (!string.IsNullOrEmpty(path))
             {
                 var textToSave = txt_AfterTranslate.Text;
-                File.WriteAllText(path, textToSave);
-            }
+
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+                using (TextWriter tw = new StreamWriter(path, true, Encoding.GetEncoding(1252)))
+                {
+                    tw.WriteLine(textToSave);
+                }
+            }          
         }
 
         private string PrepareDocumentForTranslation(string document)
