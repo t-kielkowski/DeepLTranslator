@@ -9,6 +9,7 @@ namespace DeepLTranslator
         private string _document;
         private string _textToTranslate;
         private string _translatedText;
+        private string _locatonionFilePath;
 
         public MainWindow()
         {
@@ -20,13 +21,13 @@ namespace DeepLTranslator
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.ShowDialog();
 
-            var path = openFileDialog.FileName;
+            _locatonionFilePath = openFileDialog.FileName;
 
-            if (!string.IsNullOrEmpty(path))
+            if (!string.IsNullOrEmpty(_locatonionFilePath))
             {
                 try
                 {
-                    _document = File.ReadAllText(path);
+                    _document = File.ReadAllText(_locatonionFilePath);
                 }
                 catch (Exception exc)
                 {
@@ -56,6 +57,9 @@ namespace DeepLTranslator
         private void btn_Save_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
+            var fileNumber = int.Parse(_locatonionFilePath.Split('\\')[3].Substring(0,3)).ToString();
+            saveFileDialog.FileName = fileNumber + "_pl";
+            saveFileDialog.DefaultExt = "txt";
             saveFileDialog.ShowDialog();
 
             string path = saveFileDialog.FileName;
